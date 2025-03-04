@@ -25,7 +25,7 @@ services:
               count: all
               capabilities: [gpu]
     volumes:
-      - /home/ubuntu/docker/isaac-lab/cache/kit:/isaac-sim/kit/cache:rw
+      # - /home/ubuntu/docker/isaac-lab/cache/kit:/isaac-sim/kit/cache:rw
       - ./launch.sh:/workspace/isaaclab/launch.sh
       - ./notebook/generate_dataset.ipynb:/workspace/isaaclab/notebook/generate_dataset.ipynb
       - ./samples/annotated_dataset.hdf5:/workspace/isaaclab/datasets/annotated_dataset.hdf5
