@@ -56,7 +56,7 @@ Steps:
 
        docker compose -f docker-compose.yml up
        
-5. Access the Jupyter Notebook from the browser at http://localhost:8888.
+5. Access the Jupyter Notebook from a browser at http://localhost:8888/lab/tree/generate_dataset.ipynb.
 
 ## Licenses
 
