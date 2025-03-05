@@ -35,8 +35,6 @@ Lastly, inside of the Jupyter notebook, create a prompt to generate a new world 
 > [Isaac Lab](https://github.com/isaac-sim/IsaacLab/blob/main/LICENSE), and
 > [Isaac Lab mimic](https://github.com/isaac-sim/IsaacLab/blob/main/LICENSE-mimic)
 
-* If you have not already, [install Isaac Sim and Isaac Lab](https://isaac-sim.github.io/IsaacLab/main/source/setup/installation/index.html).
-
 * Install Docker on your local machine
 
 * Clone this repository to your local machine
