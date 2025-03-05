@@ -41,22 +41,22 @@ Requirements for local deployment:
 
 Steps:
 
-1. Check if your workstation meets the [System Requirements](https://docs.isaacsim.omniverse.nvidia.com/4.5.0/installation/requirements.html#system-requirements) and [Driver Requirements](https://docs.isaacsim.omniverse.nvidia.com/4.5.0/installation/requirements.html#isaac-sim-short-driver-requirements) for running Isaac Sim.
+1. Check if your workstation meets the [System Requirements](https://docs.isaacsim.omniverse.nvidia.com/4.5.0/installation/requirements.html#system-requirements) and [Driver Requirements](https://docs.isaacsim.omniverse.nvidia.com/4.5.0/installation/requirements.html#isaac-sim-short-driver-requirements).
 
-2. Run the command below to confirm your GPU driver version is 535.129.03 or later.
-
-       nvidia-smi
-
-3. Clone this repository to your local machine and navigate to this repository.
+2. Clone this repository to your local workstation and navigate to this repository.
 
        git clone https://github.com/NVIDIA-Omniverse-blueprints/synthetic-motion-generation.git
        cd synthetic-motion-generation
 
-4. Deploy the Jupyter Notebook from the Isaac Lab container.
+3. Deploy the Jupyter Notebook with the Isaac Lab container.
 
-       docker compose -f docker-compose.yml up
+       docker compose -f docker-compose.yml up -d
        
-5. Access the Jupyter Notebook from a browser at http://localhost:8888/lab/tree/generate_dataset.ipynb.
+4. Access the Jupyter Notebook from a browser at http://localhost:8888/lab/tree/generate_dataset.ipynb.
+
+5. Run the command below to stop the Jupyter Notebook and end the demo.
+
+       docker compose -f docker-compose.yml down
 
 ## Licenses
 
@@ -66,4 +66,3 @@ By running the docker compose command, you accept the terms and conditions of th
 - [Isaac Sim and WebRTC Client](https://docs.isaacsim.omniverse.nvidia.com/4.5.0/common/legal.html),
 - [Isaac Lab](https://github.com/isaac-sim/IsaacLab/blob/main/LICENSE), and
 - [Isaac Lab mimic](https://github.com/isaac-sim/IsaacLab/blob/main/LICENSE-mimic)
-
