@@ -1,0 +1,32 @@
+[prompt]
+description = """
+The scene depicts a robotic arm performing a precise block-stacking operation with {cube_description}
+cubes in a {location}. The workspace is centered on a {table_material} table. On the table are three cubes. The robotic
+ arm, featuring a sleek industrial design clad in smooth white plastic with metallic joints,
+ extends from its base to manipulate the cubes. The entire scene is illuminated by professional studio lighting,
+ creating soft shadows. A clutter of equipment can be seen in the background. The camera is fixed in place.
+"""
+
+[variables]
+cube_description = [
+    "glass", "brightly colored plastic", "wood", "steel", "worn dull colored", "cheese",
+    "polished brass", "matte black", "translucent acrylic", "rustic copper", "brushed aluminum",
+    "painted ceramic", "textured rubber", "carbon fiber", "iridescent metal", "frosted crystal",
+    "ice", "origami paper"
+]
+table_material = [
+    "wood", "marble", "metal", "glass", "stone",
+    "polished stainless steel", "concrete", "brushed aluminum", "tempered glass", 
+    "granite", "composite resin", "industrial plastic", "carbon fiber"
+]
+location = [
+    "cluttered workshop", "manufacturing facility", "university laboratory", "restaurant",
+    "high-tech cleanroom", "industrial warehouse", "robotics research center", 
+    "automated assembly line", "testing facility", "engineering lab", 
+    "technology demonstration room", "quality control station"
+]
+
+[negative_prompt]
+description = """
+    The scene shows human workers or human arms.
+"""
