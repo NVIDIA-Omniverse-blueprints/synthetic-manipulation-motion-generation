@@ -1,0 +1,38 @@
+services:
+  isaac-lab:
+    image: nvcr.io/nvidian/gr00t-smmg-bp:1.0
+    privileged: true
+    network_mode: host
+    # ports:
+    #   - '49100:49100/tcp'  # Livestream
+    #   - '47998:47998/udp'  # Livestream
+    #   - '8888:8888'        # JupyterLab
+    environment:
+      ACCEPT_EULA: Y
+      DISPLAY: ${DISPLAY}
+    runtime: nvidia
+    pull_policy: always
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - $HOME/.Xauthority:/root/.Xauthority
+      - $HOME/docker/isaac-lab/cache/kit:/isaac-sim/kit/cache:rw
+      - ./launch.sh:/workspace/isaaclab/launch.sh
+      - ./notebook/app.py:/workspace/isaaclab/app.py
+      - ./notebook/cosmos_request.py:/workspace/isaaclab/cosmos_request.py
+      - ./notebook/generate_dataset.ipynb:/workspace/isaaclab/generate_dataset.ipynb
+      - ./notebook/notebook_utils.py:/workspace/isaaclab/notebook_utils.py
+      - ./notebook/notebook_widgets.py:/workspace/isaaclab/notebook_widgets.py
+      - ./notebook/stacking_prompt.toml:/workspace/isaaclab/stacking_prompt.toml
+      - ./samples/annotated_dataset.hdf5:/workspace/isaaclab/datasets/annotated_dataset.hdf5
+    user: root
+    working_dir: /workspace/isaaclab
+    entrypoint: ["/workspace/isaaclab/launch.sh"]
+    restart: unless-stopped
