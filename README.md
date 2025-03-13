@@ -17,7 +17,7 @@ Requirements for local deployment:
 Requirements for NVIDIA Cosmos:
 * NVIDIA GPU (H100 or higher)
 * NVIDIA H100 GPU is available on Azure in a ND H100 v5 series VM, AWS in a P5 EC2 instance and GCP in a A3 machine type VM.
-* Visit the [Cosmos Hugging Face collection](https://huggingface.co/collections/nvidia/cosmos-6751e884dc10e013a0a0d8e6) for details about specific Cosmos hardware requirements.
+* Visit the [Cosmos Hugging Face Model](https://huggingface.co/nvidia/Cosmos-Transfer1-7B) for specific details.
   
 
 ## Launch a Jupyter Notebook
