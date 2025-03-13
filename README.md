@@ -43,13 +43,7 @@ Steps:
 
        docker compose -f docker-compose.yml down
 
-### (optional) Change scenario parameters and generate new motion trajectories
-
-Follow the instructions in the Jupyter notebook to change values within the Isaac Lab scenario to generate new motion trajectories or update the simulation environment.
-
-## Create a prompt to generate a new world environment
-
-Lastly, inside of the Jupyter notebook, create a prompt to generate a new world environment for your simulation.  This will use NVIDIA Cosmos to generate a new world environment video and display it inside of your notebook for viewing.
+6. Follow the instructions inside of the Jupyter Notebook
 
 # Licenses
 
