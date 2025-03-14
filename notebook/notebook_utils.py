@@ -38,8 +38,56 @@ def _shade_segmentation(
     shading_out[i, j, 2] = wp.uint8(wp.float32(segmentation[i, j, 2]) * shade)
     shading_out[i, j, 3] = wp.uint8(255)
 
+def get_trial_frames(root_dir: str, camera_name: str, min_frames: int = 30) -> dict:
+    """Get the last frame number for each trial in the dataset.
+    
+    Args:
+        root_dir: Directory containing the frames
+        camera_name: Name of the camera used
+        min_frames: Minimum number of frames required for a valid trial
+        
+    Returns:
+        dict: Dictionary mapping trial numbers to (start_frame, end_frame) tuples
+    """
+    import re
+    
+    # Pattern to match trial and frame numbers
+    pattern = f"{camera_name}_semantic_segmentation_trial_(\d+)_env_0_step_(\d+).png"
+    
+    trial_frames = {}
+    for filename in os.listdir(root_dir):
+        match = re.match(pattern, filename)
+        if match:
+            trial_num = int(match.group(1))
+            frame_num = int(match.group(2))
+            
+            if trial_num not in trial_frames:
+                trial_frames[trial_num] = []
+            trial_frames[trial_num].append(frame_num)
+            
 
-def encode_video(root_dir: str, start_frame: int, num_frames: int, camera_name: str, output_path: str) -> None:
+    valid_trials = {}
+    for trial_num, frames in sorted(trial_frames.items()):
+        # Skip if not enough frames
+        if len(frames) < min_frames:
+            continue
+            
+        # Sort frames and get range
+        frames.sort()
+        start_frame = frames[0]
+        end_frame = frames[-1]
+        
+        # Verify frame sequence is continuous
+        expected_frames = set(range(start_frame, end_frame + 1))
+        actual_frames = set(frames)
+        if len(expected_frames - actual_frames) > 0:
+            continue
+            
+        valid_trials[trial_num] = (start_frame, end_frame)
+    
+    return valid_trials
+
+def encode_video(root_dir: str, start_frame: int, num_frames: int, camera_name: str, output_path: str, trial_num: int) -> None:
     """Encode a sequence of shaded segmentation frames into a video.
 
     Args:
@@ -48,6 +96,7 @@ def encode_video(root_dir: str, start_frame: int, num_frames: int, camera_name: 
         num_frames: Number of frames to encode
         camera_name: Name of the camera (used in filename pattern)
         output_path: Output path for the encoded video
+        trial_num: Trial number for the sequence
 
     Raises:
         ValueError: If start_frame is negative or if any required frame is missing
@@ -61,17 +110,17 @@ def encode_video(root_dir: str, start_frame: int, num_frames: int, camera_name: 
 
     # Validate all frames exist before starting
     for frame_idx in range(start_frame, start_frame + num_frames):
-        file_path_normals = os.path.join(root_dir, f"{camera_name}_normals_0_{frame_idx}.png")
-        file_path_segmentation = os.path.join(root_dir, f"{camera_name}_semantic_segmentation_0_{frame_idx}.png")
+        file_path_normals = os.path.join(root_dir, f"{camera_name}_normals_trial_{trial_num}_env_0_step_{frame_idx}.png")
+        file_path_segmentation = os.path.join(root_dir, f"{camera_name}_semantic_segmentation_trial_{trial_num}_env_0_step_{frame_idx}.png")
         if not os.path.exists(file_path_normals) or not os.path.exists(file_path_segmentation):
-            raise ValueError(f"Missing frame at frame index {frame_idx}")
+            raise ValueError(f"Missing frame at frame index {frame_idx} for trial {trial_num}")
 
     # Initialize video encoding
     video_encoding = get_video_encoding_interface()
     
     # Get dimensions from first frame
     first_frame = np.array(Image.open(os.path.join(
-        root_dir, f"{camera_name}_semantic_segmentation_0_{start_frame}.png")))
+        root_dir, f"{camera_name}_semantic_segmentation_trial_{trial_num}_env_0_step_{start_frame}.png")))
     height, width = first_frame.shape[:2]
     
     # Pre-allocate buffers
@@ -88,8 +137,8 @@ def encode_video(root_dir: str, start_frame: int, num_frames: int, camera_name: 
     )
 
     for frame_idx in range(start_frame, start_frame + num_frames):
-        file_path_normals = os.path.join(root_dir, f"{camera_name}_normals_0_{frame_idx}.png")
-        file_path_segmentation = os.path.join(root_dir, f"{camera_name}_semantic_segmentation_0_{frame_idx}.png")
+        file_path_normals = os.path.join(root_dir, f"{camera_name}_normals_trial_{trial_num}_env_0_step_{frame_idx}.png")
+        file_path_segmentation = os.path.join(root_dir, f"{camera_name}_semantic_segmentation_trial_{trial_num}_env_0_step_{frame_idx}.png")
         
         # Load and copy data to existing buffers
         normals_np = np.array(Image.open(file_path_normals)).astype(np.float32) / 255.0
