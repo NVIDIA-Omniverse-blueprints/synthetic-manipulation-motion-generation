@@ -58,9 +58,10 @@ The Blueprint container includes a pre-installed version of Isaac Lab 2.0.2 and 
 * NVIDIA GPU (RTX A 6000 with 48GB VRAM)
 * [NVIDIA GPU Driver](https://www.nvidia.com/en-us/drivers/unix/) (recommended version 535.129.03)
 
-**Requirements for self-hosted NVIDIA Cosmos:**
-
-### **TODO:** complete this part after Cosmos delpoyment
+**Requirements for self-hosted NVIDIA NIM Cosmos:**
+* In this RHOAI demo, we used [Cosmos-Transfer2.5-2B](https://build.nvidia.com/nvidia/cosmos-transfer2_5-2b), a more efficient and lightweight model for video-to-video style transfer, with enhanced control capabilities and faster inference times, supported on NIM
+* Requirements are as described above for the Cosmos-Transfer1-7B model
+* Visit the [Cosmos-Transfer2.5-2B configuration documentation](https://docs.nvidia.com/nim/cosmos/2.0.0/support-matrix.html#configurations-for-cosmos-transfer2-5-2b) for specific requirement details
 
 ## Deploy Notebook Image
 

@@ -3,6 +3,106 @@ import os
 import socket
 from urllib.parse import urlparse
 import time
+import base64
+
+
+def _process_video_nim(
+    url: str,
+    video_path: str,
+    output_path: str,
+    prompt: str,
+    control_weight: float = 0.5,
+    seed: int = 42,
+) -> requests.Response:
+    """
+    Process video using NVIDIA NIM API (Transfer2.5).
+    Used when OPENSHIFT_MODE=true.
+
+    Args:
+        url (str): The NIM endpoint URL
+        video_path (str): Path to input video (shaded segmentation)
+        output_path (str): Path to save the processed video
+        prompt (str): Text prompt for generation
+        control_weight (float): Strength of control input (0.0-1.0)
+        seed (int): Random seed for generation
+    """
+    print(f"Using NIM API mode")
+    print(f"Reading and encoding video from {video_path}...")
+
+    # Read and base64 encode the video
+    with open(video_path, 'rb') as f:
+        video_bytes = f.read()
+        video_b64 = base64.b64encode(video_bytes).decode('utf-8')
+
+    video_size_mb = len(video_bytes) / (1024 * 1024)
+    print(f"Video size: {video_size_mb:.2f} MB")
+
+    # Construct NIM API payload
+    # The notebook generates segmentation videos, so we use 'seg' control
+    payload = {
+        "prompt": prompt,
+        "video": f"data:video/mp4;base64,{video_b64}",
+        "resolution": "480",
+        "seg": {
+            "control_weight": control_weight,
+            "control": f"data:video/mp4;base64,{video_b64}"
+        },
+        "seed": seed
+    }
+
+    infer_url = f"{url}/v1/infer"
+    print(f"Sending request to {infer_url}...")
+    print(f"Prompt: {prompt}")
+    print(f"Control weight: {control_weight}")
+    print(f"Seed: {seed}")
+    print("This may take several minutes...")
+
+    try:
+        response = requests.post(
+            infer_url,
+            json=payload,
+            headers={
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+            },
+            timeout=3600,  # 1 hour timeout (typical: 5-10 min on H100, this is safety margin)
+            verify=False
+        )
+
+        if response.status_code != 200:
+            print(f"Error: HTTP {response.status_code}")
+            print(f"Response: {response.text}")
+            return None
+
+        # Decode the base64 video response
+        print("Decoding and saving video...")
+        result_data = response.json()
+        b64_video = result_data.get("b64_video")
+
+        if not b64_video:
+            print("Error: No video data in response")
+            return None
+
+        video_output = base64.b64decode(b64_video)
+
+        with open(output_path, "wb") as f:
+            f.write(video_output)
+
+        output_size_mb = len(video_output) / (1024 * 1024)
+        print(f"Video successfully saved to {output_path}")
+        print(f"Output size: {output_size_mb:.2f} MB")
+
+        return response
+
+    except requests.exceptions.Timeout:
+        print("Request timed out after 2 hours")
+        return None
+    except requests.exceptions.RequestException as e:
+        print(f"Request failed: {e}")
+        return None
+    except Exception as e:
+        print(f"Error processing response: {e}")
+        return None
 
 
 def test_connection(url):
@@ -39,26 +139,42 @@ def process_video(
     max_poll_time: int = 3600,
 ) -> requests.Response:
     """
-    Process a video using the NVCF API.
+    Process a video using either NIM API (OPENSHIFT_MODE=true) or Direct Deployment (app.py wrapper).
 
     Args:
-        url (str): The base URL of the NVCF API.
+        url (str): The base URL of the API endpoint.
         video_path (str): The path to the video file to process.
         output_path (str): The path to save the processed video.
-        prompt (str): The prompt to use to condition the Cosmos model.
-        sigma_max (float): The maximum sigma value.
-        control_weight (float): Controls how strongly the control input should affect the output.
-        canny_strength (str): The strength of the canny edge detection.
-        seed (int): The seed for the random number generator.
-        poll_interval (int): How often to poll for job completion (seconds).
-        max_poll_time (int): Maximum time to wait for job completion (seconds).
+        prompt (str): Text prompt for generation (both modes).
+        sigma_max (float): Maximum noise level for diffusion (both modes support this).
+        control_weight (float): Strength of control input, 0.0-1.0 (both modes).
+        canny_strength (str): Edge detection threshold (Direct Deployment only, ignored by NIM).
+        seed (int): Random seed for reproducible generation (both modes).
+        poll_interval (int): Polling interval in seconds (Direct Deployment only, NIM is synchronous).
+        max_poll_time (int): Maximum wait time in seconds (Direct Deployment only, NIM is synchronous).
     """
 
     if not os.path.exists(video_path):
         raise ValueError(f"Video file not found at {video_path}")
-    
+
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
+    # Check if we should use NIM API or self-hosted API
+    openshift_mode = os.getenv("OPENSHIFT_MODE", "false").lower() == "true"
+
+    if openshift_mode:
+        # Use NIM API (synchronous, /v1/infer endpoint)
+        return _process_video_nim(
+            url=url,
+            video_path=video_path,
+            output_path=output_path,
+            prompt=prompt,
+            control_weight=control_weight,
+            seed=seed
+        )
+
+    # Direct Deployment mode (app.py wrapper with async job-based API)
+    print(f"Using Direct Deployment mode (app.py wrapper)")
     # Test connection first
     print(f"Testing connection to {url}...")
     success, message = test_connection(url)
