@@ -1,0 +1,28 @@
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: isaac-lab
+  namespace: redhat-ods-applications
+  labels:
+    opendatahub.io/dashboard: "true"
+    opendatahub.io/notebook-image: "true"
+    opendatahub.io/component: "true"
+    app.kubernetes.io/part-of: "workbenches"
+    component.opendatahub.io/name: "notebooks"
+  annotations:
+    opendatahub.io/notebook-image-name: "Isaac Lab"
+    opendatahub.io/notebook-image-desc: "Isaac Lab + Isaac Sim for robotics (GPU required)"
+spec:
+  lookupPolicy:
+    local: false
+  tags:
+  - name: "1.0"
+    annotations:
+      opendatahub.io/notebook-software: '[{"name":"Python","version":"3.10"},{"name":"CUDA","version":"12.1"},{"name":"Isaac Sim","version":"4.5.0"}]'
+      opendatahub.io/notebook-python-dependencies: '[{"name":"Isaac Lab","version":"2.0.2"}]'
+    from:
+      kind: ImageStreamTag
+      namespace: ${NAMESPACE}
+      name: isaac-lab:1.0
+    referencePolicy:
+      type: Source

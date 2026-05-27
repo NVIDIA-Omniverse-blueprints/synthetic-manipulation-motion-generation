@@ -50,6 +50,46 @@ Steps:
 >[!NOTE]
 The Blueprint container includes a pre-installed version of Isaac Lab 2.0.2 and Isaac Sim 4.5.0.
 
+# Deploy On RHOAI Cluster
+
+## Prerequisites
+**Requirements for Isaac Lab:**
+* Red Hat OpenShift AI cluster with GPU-enabled nodes
+* NVIDIA GPU (RTX A 6000 with 48GB VRAM)
+* [NVIDIA GPU Driver](https://www.nvidia.com/en-us/drivers/unix/) (recommended version 535.129.03)
+
+**Requirements for self-hosted NVIDIA NIM Cosmos:**
+* In this RHOAI demo, we used [Cosmos-Transfer2.5-2B](https://build.nvidia.com/nvidia/cosmos-transfer2_5-2b), a more efficient and lightweight model for video-to-video style transfer, with enhanced control capabilities and faster inference times, supported on NIM
+* Requirements are as described above for the Cosmos-Transfer1-7B model
+* Visit the [Cosmos-Transfer2.5-2B configuration documentation](https://docs.nvidia.com/nim/cosmos/2.0.0/support-matrix.html#configurations-for-cosmos-transfer2-5-2b) for specific requirement details
+
+## Deploy Notebook Image
+
+Steps:
+
+1. Build and register the Isaac Lab notebook image in RHOAI.
+
+       ./deploy/deploy-isaac-lab-image.sh
+
+2. Create a workbench in RHOAI Dashboard:
+   * Navigate to RHOAI Dashboard → Data Science Projects
+   * Create new project (if needed)
+   * Click "Create workbench"
+   * Select "Isaac Lab" from notebook image dropdown
+   * Configure:
+     * Container size: Large
+     * GPU: 1x NVIDIA GPU (according to prerequisites)
+   * Click Create
+
+3. Access the Jupyter Notebook from the workbench URL provided by RHOAI.
+
+4. Follow the instructions inside of the Jupyter Notebook.
+
+**To rebuild after code changes:**
+
+    oc start-build isaac-lab --from-dir=. --follow -n nvidia-omniverse-blueprint
+    oc tag nvidia-omniverse-blueprint/isaac-lab:latest nvidia-omniverse-blueprint/isaac-lab:1.0
+
 # Licenses
 
 By running the docker compose command, you accept the terms and conditions of all the licenses below:
